@@ -6,7 +6,7 @@ const UserMenu = () => {
   return (
     <>
       <Container>
-        <h1>Dashboard</h1>
+        <h1>User Dashboard</h1>
         <div class="list-group">
           <Link
             to="/dashboard/user/profile"

@@ -21,6 +21,12 @@ const AdminMenu = () => {
             Create Product
           </Link>
           <Link
+            to="/dashboard/admin/products"
+            class="list-group-item list-group-item-action"
+          >
+            Product
+          </Link>
+          <Link
             to="/dashboard/admin/users"
             class="list-group-item list-group-item-action"
           >
