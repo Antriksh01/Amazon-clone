@@ -23,12 +23,20 @@ import Orders from "./Pages/user/Orders";
 import Profile from "./Pages/user/Profile";
 import Products from "./Pages/Admin/Products";
 import UpdateProduct from "./Pages/Admin/UpdateProduct";
+import SearchField from "./Pages/SearchField";
+import ProductDetails from "./Pages/ProductDetails";
+import Categories from "./Pages/Categories";
+import CategoryProducts from "./Pages/CategoryProducts";
 
 const App = () => {
   return (
     <>
       <Routes>
         <Route exact path="/" element={<HomePage />} />
+        <Route path="/product/:slug" element={<ProductDetails />} />
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/category/:slug" element={<CategoryProducts />} />
+        <Route path="/search" element={<SearchField />} />
         <Route exact path="/about" element={<About />} />
         <Route exact path="/contact" element={<Contact />} />
         <Route exact path="/policy" element={<Policy />} />

@@ -3,9 +3,15 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { ImAmazon } from "react-icons/im";
 import { useAuth } from "../../context/auth";
+import SearchInput from "../form/SearchInput";
+import useCategory from "../../hooks/useCategory";
+import { useCart } from "../../context/cartContext";
+import { Badge } from "antd";
 
 const Header = () => {
   const [auth, setAuth] = useAuth();
+  const categories = useCategory();
+  const [cart] = useCart();
 
   const handleLogout = (e) => {
     setAuth({
@@ -37,10 +43,37 @@ const Header = () => {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
               <ul class="navbar-nav ms-auto">
+                <SearchInput />
                 <li class="nav-item">
                   <Link class="nav-link" aria-current="page" to="/">
                     Home
                   </Link>
+                </li>
+                <li className="nav-item dropdown">
+                  <Link
+                    className="nav-link dropdown-toggle"
+                    to={"/categories"}
+                    data-bs-toggle="dropdown"
+                  >
+                    Categories
+                  </Link>
+                  <ul className="dropdown-menu">
+                    <li>
+                      <Link className="dropdown-item" to={"/categories"}>
+                        All Categories
+                      </Link>
+                    </li>
+                    {categories?.map((c) => (
+                      <li>
+                        <Link
+                          className="dropdown-item"
+                          to={`/category/${c.slug}`}
+                        >
+                          {c.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </li>
 
                 {!auth.user ? (
@@ -98,9 +131,11 @@ const Header = () => {
                   </>
                 )}
                 <li class="nav-item">
-                  <Link class="nav-link" to="/cart">
-                    Cart
-                  </Link>
+                  <Badge count={cart?.length} showZero>
+                    <Link class="nav-link" to="/cart">
+                      Cart
+                    </Link>
+                  </Badge>
                 </li>
               </ul>
             </div>
