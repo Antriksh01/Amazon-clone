@@ -1,14 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout/Layout";
 import styled from "styled-components";
 import { useAuth } from "../context/auth";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/cartContext";
+import axios from "axios";
+// import DropIn from "braintree-web-drop-in-react";
+import DropIn from "braintree-web-drop-in-react";
+import { toast } from "react-hot-toast";
 
 const Cart = () => {
   const [cart, setCart] = useCart();
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
+  const [clientToken, setClientToken] = useState("");
+  const [instance, setInstance] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // console.log(auth?.user);
+
+  const totalPrice = (pid) => {
+    try {
+      let total = 0;
+      cart?.map((item) => {
+        total = total + item.price;
+      });
+      return total.toLocaleString("en-us", {
+        style: "currency",
+        currency: "INR",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // delete item
   const removeCartItem = (pid) => {
@@ -20,6 +44,44 @@ const Cart = () => {
       localStorage.setItem("cart", JSON.stringify(myCart));
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  // get payment token gateway
+  const getToken = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:4600/api/v1/product/braintree/token"
+      );
+      setClientToken(data?.clientToken);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getToken();
+  }, [auth?.token]);
+
+  // handlePayment
+  const handlePayment = async () => {
+    try {
+      setLoading(true);
+      const { nonce } = await instance.requestPaymentMethod();
+      const { data } = await axios.post(
+        "http://localhost:4600/api/v1/product/braintree/payment",
+        nonce,
+        cart
+      );
+
+      setLoading(false);
+      localStorage.removeItem("cart");
+      setCart([]);
+      navigate("/dashboard/user/orders");
+      toast.success("Payment completed successfully");
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
     }
   };
 
@@ -71,7 +133,73 @@ const Cart = () => {
               <h4>Cart Summary</h4>
               <p>Total | Checkout | Payment</p>
               <hr />
-              <h4>Total :</h4>
+              <h4>Total :{totalPrice()}</h4>
+              {auth?.user?.address ? (
+                <>
+                  <div className="mb-3">
+                    <h4>current address</h4>
+                    <h6>{auth?.user?.address}</h6>
+                    <button
+                      className="btn btn-outline-warning"
+                      onClick={() => navigate("/dashboard/user/profile")}
+                    >
+                      Update Address
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-3">
+                    {auth?.token ? (
+                      <button
+                        className="btn btn-outline-warning"
+                        onClick={() =>
+                          navigate("/dashboard/user/profile", {
+                            state: "http://localhost:3000/cart",
+                          })
+                        }
+                      >
+                        Update Address
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-outline-warning"
+                        onClick={() =>
+                          navigate("/login", {
+                            state: "/cart",
+                          })
+                        }
+                      >
+                        Please Login to checkout
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+              <div className="mt-2">
+                {!clientToken || !cart.length ? (
+                  ""
+                ) : (
+                  <>
+                    <DropIn
+                      options={{
+                        authorization: clientToken,
+                        paypal: {
+                          flow: "vault",
+                        },
+                      }}
+                      onInstance={(instance) => setInstance(instance)}
+                    />
+                    <button
+                      className="btn btn-warning"
+                      onClick={handlePayment}
+                      disabled={loading || !instance || !auth?.user?.address}
+                    >
+                      {loading ? "processing..." : "Make Payment"}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>

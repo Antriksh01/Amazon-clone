@@ -4,6 +4,7 @@ import styled from "styled-components";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/auth";
+import { toast } from "react-hot-toast";
 
 const Login = () => {
   const [auth, setAuth] = useAuth();
@@ -39,15 +40,15 @@ const Login = () => {
         });
 
         console.log(response);
-        alert("Login successfully");
+        toast.success("Login successfully");
         localStorage.setItem("auth", JSON.stringify(response.data));
 
         navigate(location.state || "/");
       } else {
-        alert("invalid credentials");
+        toast.failed("invalid credentials");
       }
     } catch (err) {
-      alert(err.response.data.msg);
+      toast.failed(err.response.data.msg);
       console.log(err.response.data.msg);
       console.log(err);
     }

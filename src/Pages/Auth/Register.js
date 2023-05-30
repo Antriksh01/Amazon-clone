@@ -4,6 +4,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout/Layout";
 import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-hot-toast";
 
 const Register = () => {
   const [data, setData] = useState({
@@ -37,7 +38,7 @@ const Register = () => {
         "http://localhost:4600/api/v1/auth/register",
         sendData
       );
-      alert("Registration successfully");
+      toast.success("Registration successfully");
       console.log(response);
       navigate("/login");
     } catch (err) {
